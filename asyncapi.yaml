@@ -1,0 +1,121 @@
+asyncapi: 2.6.0
+info:
+  title: University Registration Async Events
+  version: '1.0.0'
+  description: |
+    This document describes the asynchronous event communication across university microservices using message brokers.
+    The system complements RESTful APIs by decoupling event-based operations like registration and conflict approval.
+
+servers:
+  production:
+    url: broker.university.edu
+    protocol: amqp
+    description: Production Message Broker (RabbitMQ/Kafka)
+
+channels:
+  registration.requests:
+    description: Event sent when a student submits a course registration request.
+    publish:
+      summary: Student registration submission
+      operationId: sendRegistrationRequest
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            studentId:
+              type: string
+            courses:
+              type: array
+              items:
+                type: string
+            timestamp:
+              type: string
+              format: date-time
+
+  registration.responses:
+    description: Event published by the registration worker on successful processing.
+    subscribe:
+      summary: Registration success response
+      operationId: receiveRegistrationResponse
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            studentId:
+              type: string
+            status:
+              type: string
+              enum: [registered]
+            registeredCourses:
+              type: array
+              items:
+                type: string
+            timestamp:
+              type: string
+              format: date-time
+
+  registration.failures:
+    description: Event published by the registration worker on failure.
+    subscribe:
+      summary: Registration failure event
+      operationId: receiveRegistrationFailure
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            studentId:
+              type: string
+            status:
+              type: string
+              enum: [failed]
+            reason:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+
+  registrar.conflict-approvals:
+    description: Event sent by registrar service to initiate conflict approval.
+    publish:
+      summary: Conflict approval event
+      operationId: sendConflictApproval
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            conflictId:
+              type: string
+            studentId:
+              type: string
+            courseId:
+              type: string
+            note:
+              type: string
+            approvedBy:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+
+  registrar.conflict-responses:
+    description: Event sent after conflict approval is processed.
+    subscribe:
+      summary: Conflict approval result
+      operationId: receiveConflictResponse
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            conflictId:
+              type: string
+            status:
+              type: string
+              enum: [approved, rejected]
+            processedAt:
+              type: string
+              format: date-time
