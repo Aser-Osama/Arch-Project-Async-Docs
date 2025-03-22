@@ -26,19 +26,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Cache npm packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: npm-cache-${{ runner.os }}-${{ hashFiles('asyncapi.yaml') }}
-          restore-keys: |
-            npm-cache-${{ runner.os }}-
+      - name: Install AsyncAPI Generator
+        run: npm install -g @asyncapi/generator
 
-      - name: Generate HTML docs with AsyncAPI CLI
+      - name: Generate HTML docs
         run: |
           mkdir -p docs
-          npx @asyncapi/generator asyncapi.yaml @asyncapi/html-template -o docs --disable-warning --no-tty
-
+          ag asyncapi.yaml @asyncapi/html-template -o docs
       - name: Upload generated docs as GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
