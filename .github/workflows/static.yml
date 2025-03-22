@@ -37,7 +37,7 @@ jobs:
       - name: Generate HTML docs with AsyncAPI CLI
         run: |
           mkdir -p docs
-          npx @asyncapi/generator@2.6.0 asyncapi.yaml @asyncapi/html-template@1.7.0 -o docs --disable-warning
+          npx @asyncapi/generator asyncapi.yaml @asyncapi/html-template -o docs --disable-warning --no-tty
 
       - name: Upload generated docs as GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
